@@ -26,12 +26,12 @@ public class OrderBook
         if (order.Side == Side.Buy)
         {
             Bids.Add(order);
-            Bids.Sort((a, b) => b.Price.CompareTo(a.Price));
+            Bids.Sort((a, b) => b.Price.Amount.CompareTo(a.Price.Amount));
         }
         else if (order.Side == Side.Sell)
         {
             Asks.Add(order);
-            Asks.Sort((a, b) => a.Price.CompareTo(b.Price));
+            Asks.Sort((a, b) => a.Price.Amount.CompareTo(b.Price.Amount));
         }
     }
 
@@ -43,8 +43,13 @@ public class OrderBook
             Asks.Remove(order);
     }
 
-    internal List<LimitOrder> GetCounterOrders(Side side)
+    public List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
     {
-        return side == Side.Buy ? Asks : Bids;
+        if (side == Side.Buy)
+            return limitPrice == null ? Asks : Asks.Where(order => order.Price.Amount <= limitPrice.Amount).ToList();
+        else if (side == Side.Sell)
+            return limitPrice == null ? Bids : Bids.Where(order => order.Price.Amount >= limitPrice.Amount).ToList();
+        else
+            throw new ArgumentException("Invalid side");
     }
 }
