@@ -2,19 +2,11 @@ using Core.Orders;
 
 namespace Core;
 
-public class MatchingService
+public static class MatchingService
 {
-    private MatchingService()
-    {}
-
-    public static MatchingService Create()
-    {
-        return new MatchingService();
-    }
-
     public static void PlaceOrder(MarketOrder order, OrderBook orderBook)
     {
-        Console.WriteLine($"Placing order: {order}");
+        Console.WriteLine($"Beginning to place order: {order}");  
 
         var counterOrders = orderBook.GetCounterOrders(order.Side);
 
@@ -56,7 +48,7 @@ public class MatchingService
 
     public static void PlaceOrder(LimitOrder order, OrderBook orderBook)
     {
-        Console.WriteLine($"Placing order: {order}");
+        Console.WriteLine($"Beginning to place order: {order}");
 
         var counterOrders = orderBook.GetCounterOrders(order.Side, order.Price);
 

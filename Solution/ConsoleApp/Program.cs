@@ -10,23 +10,23 @@ var appleShares = Asset.Create("AAPL", "Apple Inc.");
 // Order Book
 var appleOrderBook = OrderBook.Create(appleShares);
 
-// Place orders with matching service
-MatchingService.PlaceOrder(
-    LimitOrder.Create(Side.Sell, 100, appleShares, LimitPrice.Create(420)),
-    appleOrderBook);
+// Order Queue
+var appleOrderQueue = OrderQueue.Create(appleOrderBook);
 
-MatchingService.PlaceOrder(
-    LimitOrder.Create(Side.Sell, 50, appleShares, LimitPrice.Create(415)),
-    appleOrderBook);
+// Existing order
+appleOrderQueue.Place(LimitOrder.Create(Side.Sell, 100, appleShares, LimitPrice.Create(410)));
 
-MatchingService.PlaceOrder(
-    LimitOrder.Create(Side.Sell, 100, appleShares, LimitPrice.Create(415)),
-    appleOrderBook);
+// Simultaneous orders
+var simultaneousOrders = new List<Task>
+{
+    Task.Run(() => appleOrderQueue.Place(
+    LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415)))),
+    
+    Task.Run(() => appleOrderQueue.Place(
+    MarketOrder.Create(Side.Buy, 100, appleShares))),
+    
+    Task.Run(() => appleOrderQueue.Place(
+    LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415))))
+};
 
-MatchingService.PlaceOrder(
-    MarketOrder.Create(Side.Buy, 100, appleShares),
-    appleOrderBook);
-
-MatchingService.PlaceOrder(
-    LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415)),
-    appleOrderBook);
+await Task.WhenAll(simultaneousOrders);

@@ -19,7 +19,7 @@ public class LimitOrder : Order
 
     public override string ToString()
     {
-        return $"Limit {base.ToString()}, Price: {Price:C}";
+        return $"Limit {base.ToString()}, Price: {Price.Amount:C}";
     }
 
 }
