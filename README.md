@@ -18,6 +18,9 @@ This repository contains an implementation of an **Order Book** and **Order Matc
   - Market Orders
   - Limit Orders
 
+- **Concurrency Support**:
+  - Orders can be safely and fairly placed concurrently
+
 - **Performance Optimization**:
   - Designed with scalability in mind, suitable for high-frequency trading scenarios.
 
