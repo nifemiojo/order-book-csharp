@@ -13,11 +13,14 @@ var appleOrderBook = OrderBook.Create(appleShares);
 // Order Queue
 var appleOrderQueue = OrderQueue.Create(appleOrderBook);
 
+// Process orders
+var orderProcessingTask = appleOrderQueue.StartProcessingOrders();
+
 // Existing order
 appleOrderQueue.Place(LimitOrder.Create(Side.Sell, 100, appleShares, LimitPrice.Create(410)));
 
 // Simultaneous orders
-var simultaneousOrders = new List<Task>
+var launchTasks = new List<Task>
 {
     Task.Run(() => appleOrderQueue.Place(
     LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415)))),
@@ -26,7 +29,9 @@ var simultaneousOrders = new List<Task>
     MarketOrder.Create(Side.Buy, 100, appleShares))),
     
     Task.Run(() => appleOrderQueue.Place(
-    LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415))))
+    LimitOrder.Create(Side.Buy, 100, appleShares, LimitPrice.Create(415)))),
+
+    orderProcessingTask
 };
 
-await Task.WhenAll(simultaneousOrders);
+await Task.WhenAll(launchTasks);

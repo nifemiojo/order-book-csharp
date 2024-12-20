@@ -115,9 +115,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For questions or suggestions, please contact:
-- **Name**: [Your Name]
-- **Email**: your.email@example.com
-- **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/yourusername)
+- **Name**: Femi Ojo
+- **Email**: nifemiojo13@gmail.com
+- **LinkedIn**: [My LinkedIn Profile](https://www.linkedin.com/in/femi-o-1848a1101/)
 
 ---
 

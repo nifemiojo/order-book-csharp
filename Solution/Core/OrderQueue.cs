@@ -5,9 +5,10 @@ namespace Core;
 
 public class OrderQueue
 {
-    private readonly ConcurrentQueue<Order> _orders = new();
-    private readonly object _processingLock = new();
     private readonly OrderBook _orderBook;
+    private readonly ConcurrentQueue<Order> _orders = new();
+    private readonly object workerLock = new();
+    private Task? workerTask = null;
 
     private OrderQueue(OrderBook orderBook)
     {
@@ -19,31 +20,36 @@ public class OrderQueue
     public void Place(Order order)
     {
         _orders.Enqueue(order);
-        Console.WriteLine($"Order {order.Id} enqueued at {DateTime.UtcNow} by thread {Thread.CurrentThread.ManagedThreadId}.");
 
-        ProcessOrders(_orderBook);
+        Console.WriteLine($"Order {order.Id} enqueued at {DateTime.UtcNow} by thread {Thread.CurrentThread.ManagedThreadId}.");
+    }
+
+    public Task StartProcessingOrders()
+    {
+        lock (workerLock)
+        {
+            if (workerTask == null)
+                return Task.Run(() => ProcessOrders(_orderBook));
+        }
+
+        return Task.CompletedTask;
     }
 
     private void ProcessOrders(OrderBook orderBook)
     {
-        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} is attempting to acquire the lock at {DateTime.Now}");
+        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} has started processing orders at {DateTime.UtcNow}.");
 
-        lock (_processingLock)
+        while (_orders.TryDequeue(out var order))
         {
-            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} acquired the lock at {DateTime.Now}");
-
-            while (_orders.TryDequeue(out var order))
+            Console.WriteLine($"Order {order.Id} dequeued at {DateTime.UtcNow}");
+            
+            if (order is MarketOrder marketOrder)
             {
-                Console.WriteLine($"Order {order.Id} dequeued at {DateTime.UtcNow}");
-                
-                if (order is MarketOrder marketOrder)
-                {
-                    MatchingService.PlaceOrder(marketOrder, orderBook);
-                }
-                else if (order is LimitOrder limitOrder)
-                {
-                    MatchingService.PlaceOrder(limitOrder, orderBook);
-                }
+                MatchingService.PlaceOrder(marketOrder, orderBook);
+            }
+            else if (order is LimitOrder limitOrder)
+            {
+                MatchingService.PlaceOrder(limitOrder, orderBook);
             }
         }
     }
