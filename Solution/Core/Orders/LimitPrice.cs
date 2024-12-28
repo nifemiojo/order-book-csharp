@@ -1,6 +1,6 @@
 namespace Core.Orders;
 
-public class LimitPrice
+public record class LimitPrice
 {
     public decimal Amount { get; set; }
 
@@ -9,5 +9,5 @@ public class LimitPrice
         Amount = amount;
     }
 
-    public static LimitPrice Create(decimal amount) => new LimitPrice(amount);
+    public static LimitPrice Create(decimal amount) => new(amount);
 }

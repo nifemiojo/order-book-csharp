@@ -9,7 +9,7 @@ public class OrderBook
     public List<LimitOrder> Bids { get; private set; }
     public List<LimitOrder> Asks { get; private set; }
 
-    private OrderBook(Asset asset)
+    protected OrderBook(Asset asset)
     {
         Bids = [];
         Asks = [];
@@ -21,7 +21,13 @@ public class OrderBook
         return new OrderBook(asset);
     }
 
-    public void AddOrder(LimitOrder order)
+    public virtual void Clear()
+    {
+        Bids.Clear();
+        Asks.Clear();
+    }
+
+    public virtual void AddOrder(LimitOrder order)
     {
         if (order.Side == Side.Buy)
         {
@@ -35,7 +41,7 @@ public class OrderBook
         }
     }
 
-    public void RemoveOrder(LimitOrder order)
+    public virtual void RemoveOrder(LimitOrder order)
     {
         if (order.Side == Side.Buy)
             Bids.Remove(order);
@@ -43,7 +49,7 @@ public class OrderBook
             Asks.Remove(order);
     }
 
-    public List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
+    public virtual List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
     {
         if (side == Side.Buy)
             return limitPrice == null ? Asks : Asks.Where(order => order.Price.Amount <= limitPrice.Amount).ToList();
