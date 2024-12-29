@@ -49,17 +49,37 @@ public class OrderBookRBTree : OrderBook
         bookSide[order.Price].Dequeue();
     }
 
-    public override List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
+    public override LimitOrder? GetBestOrder(Side side, LimitPrice? limitPrice = null)
     {
-        var bookSide = side == Side.Buy ? _asks : _bids;
+        var counterSideBook = side == Side.Buy ? _asks : _bids;
 
-        if (bookSide.Count == 0) return [];
+        if (counterSideBook.Count == 0)
+            return null;
 
-        if (limitPrice == null) return bookSide.Values.SelectMany(x => x).ToList();
+        foreach (var kvp in counterSideBook)
+        {
+            var counterPrice = kvp.Key;
+            var queue = kvp.Value;
 
-        if (side == Side.Buy)
-            return bookSide.Where(priceOrders => priceOrders.Key.Amount >= limitPrice.Amount).SelectMany(x => x.Value).ToList();
-        else
-            return bookSide.Where(priceOrders => priceOrders.Key.Amount <= limitPrice.Amount).SelectMany(x => x.Value).ToList();
+            if (limitPrice != null)
+            {
+                var priceSatisfiesLimit = side == Side.Buy
+                    ? counterPrice.Amount <= limitPrice.Amount
+                    : counterPrice.Amount >= limitPrice.Amount;
+
+                if (!priceSatisfiesLimit)
+                    return null;
+            }
+
+            // Deciding whether to keep empty queues or not depends on the use case
+            // High Activity at Reused Price Levels (Frequent Updates) - Keep Empty Queues (In this impl)
+            // Wide Price Ranges with Sparse Activity - Don't Keep Empty Queues
+            if (queue.Count == 0)
+                continue;
+
+            return queue.Peek();
+        }
+
+        return null;
     }
 }

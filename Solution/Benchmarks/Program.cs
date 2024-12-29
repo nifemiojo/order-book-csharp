@@ -17,7 +17,7 @@ var appleOrderBook = OrderBookRBTree.Create(appleShares);
 // Order Queue
 var appleOrderQueue = OrderQueue.Create(appleOrderBook);
 
-var orderCount = 25000;
+var orderCount = 1000000;
 var random = new Random();
 for (int i = 0; i < orderCount; i++)
 {
@@ -27,7 +27,11 @@ for (int i = 0; i < orderCount; i++)
     appleOrderQueue.Place(LimitOrder.Create(side, quantity, appleShares, LimitPrice.Create(decimal.Round((decimal)price, 1))));
 }
 
-Thread.Sleep(5000);
+//Thread.Sleep(5000);
 
 // Process orders
-await appleOrderQueue.StartProcessingOrdersAsync();
+var sw = Stopwatch.StartNew();
+appleOrderQueue.StartProcessingOrders();
+sw.Stop();
+
+Console.WriteLine($"Processed {orderCount} orders in {sw.ElapsedMilliseconds} ms.");

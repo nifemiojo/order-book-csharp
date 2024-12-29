@@ -50,13 +50,16 @@ public static class MatchingService
     {
         //Console.WriteLine($"Beginning to place order: {order}");
 
-        var counterOrders = orderBook.GetCounterOrders(order.Side, order.Price);
-
         var remainingQuantity = order.Quantity;
 
-        while (remainingQuantity > 0 && counterOrders.Count > 0)
+        while (remainingQuantity > 0)
         {
-            var bestOrder = counterOrders.First();
+            var bestOrder = orderBook.GetBestOrder(order.Side, order.Price);
+
+            if (bestOrder == null)
+            {
+                break;
+            }
 
             var matchQuantity = Math.Min(bestOrder.Quantity, remainingQuantity);
 
@@ -68,7 +71,6 @@ public static class MatchingService
             if (bestOrder.Quantity == 0)
             {
                 orderBook.RemoveOrder(bestOrder);
-                counterOrders.Remove(bestOrder);
             }
         }
 

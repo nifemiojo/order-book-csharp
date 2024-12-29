@@ -12,7 +12,7 @@ public class OrderQueueOptV1Benchmarks
     private Asset _asset;
     private OrderBookRBTree _orderBook;
 
-    [Params(1000, 10000, 25000, 50000, 100000)]
+    [Params(1000, 10000, 25000, 50000, 100000, 500000, 1000000)]
     public int _orderCount;
 
     [GlobalSetup]

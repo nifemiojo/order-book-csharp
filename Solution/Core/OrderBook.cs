@@ -1,5 +1,6 @@
 using Core.Assets;
 using Core.Orders;
+using System.Threading.Tasks;
 
 namespace Core;
 
@@ -57,5 +58,27 @@ public class OrderBook
             return limitPrice == null ? Bids : Bids.Where(order => order.Price.Amount >= limitPrice.Amount).ToList();
         else
             throw new ArgumentException("Invalid side");
+    }
+
+    public virtual LimitOrder? GetBestOrder(Side side, LimitPrice? limitPrice = null)
+    {
+        var counterSideBook = side == Side.Buy ? Asks : Bids;
+
+        if (counterSideBook.Count == 0)
+            return null;
+
+        var bestOrder = counterSideBook.First();
+
+        if (limitPrice != null)
+        {
+            var priceSatisfiesLimit = side == Side.Buy
+                ? bestOrder.Price.Amount <= limitPrice.Amount
+                : bestOrder.Price.Amount >= limitPrice.Amount;
+
+            if (!priceSatisfiesLimit)
+                return null;
+        }
+
+        return bestOrder;
     }
 }
