@@ -1,20 +1,22 @@
 using Core.Assets;
 using Core.Orders;
-using System.Threading.Tasks;
 
 namespace Core;
 
-public class OrderBook
+/// <summary>
+/// Price priority order book. An unoptimised implementation.
+/// </summary>
+public class OrderBook : IOrderBook
 {
-    public Asset Asset { get; private set; }
-    public List<LimitOrder> Bids { get; private set; }
-    public List<LimitOrder> Asks { get; private set; }
+    private readonly Asset _asset;
+    private readonly List<LimitOrder> _bids;
+    private readonly List<LimitOrder> _asks;
 
-    protected OrderBook(Asset asset)
+    private OrderBook(Asset asset)
     {
-        Bids = [];
-        Asks = [];
-        Asset = asset;
+        _bids = [];
+        _asks = [];
+        _asset = asset;
     }
 
     public static OrderBook Create(Asset asset)
@@ -22,47 +24,47 @@ public class OrderBook
         return new OrderBook(asset);
     }
 
-    public virtual void Clear()
+    public void Clear()
     {
-        Bids.Clear();
-        Asks.Clear();
+        _bids.Clear();
+        _asks.Clear();
     }
 
-    public virtual void AddOrder(LimitOrder order)
+    public void AddOrder(LimitOrder order)
     {
         if (order.Side == Side.Buy)
         {
-            Bids.Add(order);
-            Bids.Sort((a, b) => b.Price.Amount.CompareTo(a.Price.Amount));
+            _bids.Add(order);
+            _bids.Sort((a, b) => b.Price.Amount.CompareTo(a.Price.Amount));
         }
         else if (order.Side == Side.Sell)
         {
-            Asks.Add(order);
-            Asks.Sort((a, b) => a.Price.Amount.CompareTo(b.Price.Amount));
+            _asks.Add(order);
+            _asks.Sort((a, b) => a.Price.Amount.CompareTo(b.Price.Amount));
         }
     }
 
-    public virtual void RemoveOrder(LimitOrder order)
+    public void RemoveOrder(LimitOrder order)
     {
         if (order.Side == Side.Buy)
-            Bids.Remove(order);
+            _bids.Remove(order);
         else if (order.Side == Side.Sell)
-            Asks.Remove(order);
+            _asks.Remove(order);
     }
 
-    public virtual List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
+    public List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
     {
         if (side == Side.Buy)
-            return limitPrice == null ? Asks : Asks.Where(order => order.Price.Amount <= limitPrice.Amount).ToList();
+            return limitPrice == null ? _asks : _asks.Where(order => order.Price.Amount <= limitPrice.Amount).ToList();
         else if (side == Side.Sell)
-            return limitPrice == null ? Bids : Bids.Where(order => order.Price.Amount >= limitPrice.Amount).ToList();
+            return limitPrice == null ? _bids : _bids.Where(order => order.Price.Amount >= limitPrice.Amount).ToList();
         else
             throw new ArgumentException("Invalid side");
     }
 
-    public virtual LimitOrder? GetBestOrder(Side side, LimitPrice? limitPrice = null)
+    public LimitOrder? GetBestOrder(Side side, LimitPrice? limitPrice = null)
     {
-        var counterSideBook = side == Side.Buy ? Asks : Bids;
+        var counterSideBook = side == Side.Buy ? _bids : _asks;
 
         if (counterSideBook.Count == 0)
             return null;
@@ -72,8 +74,8 @@ public class OrderBook
         if (limitPrice != null)
         {
             var priceSatisfiesLimit = side == Side.Buy
-                ? bestOrder.Price.Amount <= limitPrice.Amount
-                : bestOrder.Price.Amount >= limitPrice.Amount;
+                ? bestOrder.Price.Amount >= limitPrice.Amount
+                : bestOrder.Price.Amount <= limitPrice.Amount;
 
             if (!priceSatisfiesLimit)
                 return null;
@@ -81,4 +83,8 @@ public class OrderBook
 
         return bestOrder;
     }
+
+    // Expose snapshots for testing
+    public IReadOnlyList<LimitOrder> GetBidsSnapshot() => _bids.AsReadOnly();
+    public IReadOnlyList<LimitOrder> GetAsksSnapshot() => _asks.AsReadOnly();
 }

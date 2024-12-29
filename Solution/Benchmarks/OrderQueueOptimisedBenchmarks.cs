@@ -6,11 +6,11 @@ using Core;
 namespace Benchmarking;
 
 [SimpleJob(iterationCount: 10, invocationCount: 1)]
-public class OrderQueueOptV1Benchmarks
+public class OrderQueueOptimisedBenchmarks
 {
     private OrderQueue _orderQueue;
     private Asset _asset;
-    private OrderBookRBTree _orderBook;
+    private OrderBookBST _orderBook;
 
     [Params(1000, 10000, 25000, 50000, 100000, 500000, 1000000)]
     public int _orderCount;
@@ -19,7 +19,7 @@ public class OrderQueueOptV1Benchmarks
     public void GlobalSetup()
     {
         _asset = Asset.Create("AAPL", "Apple Inc.");
-        _orderBook = OrderBookRBTree.Create(_asset);
+        _orderBook = OrderBookBST.Create(_asset);
         _orderQueue = OrderQueue.Create(_orderBook);
     }
 

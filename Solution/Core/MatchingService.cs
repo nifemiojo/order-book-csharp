@@ -4,17 +4,21 @@ namespace Core;
 
 public static class MatchingService
 {
-    public static void PlaceOrder(MarketOrder order, OrderBook orderBook)
+    public static void PlaceOrder(MarketOrder order, IOrderBook orderBook)
     {
         // Console.WriteLine($"Beginning to place order: {order}");  
 
-        var counterOrders = orderBook.GetCounterOrders(order.Side);
-
         var remainingQuantity = order.Quantity;
 
-        while (remainingQuantity > 0 && counterOrders.Count > 0)
+        while (remainingQuantity > 0)
         {
-            var bestOrder = counterOrders.First();
+            var bestOrder = orderBook.GetBestOrder(
+                order.Side == Side.Buy ? Side.Sell : Side.Buy);
+
+            if (bestOrder == null)
+            {
+                break;
+            }
 
             var matchQuantity = Math.Min(bestOrder.Quantity, remainingQuantity);
 
@@ -46,7 +50,7 @@ public static class MatchingService
         }
     }
 
-    public static void PlaceOrder(LimitOrder order, OrderBook orderBook)
+    public static void PlaceOrder(LimitOrder order, IOrderBook orderBook)
     {
         //Console.WriteLine($"Beginning to place order: {order}");
 
@@ -54,7 +58,9 @@ public static class MatchingService
 
         while (remainingQuantity > 0)
         {
-            var bestOrder = orderBook.GetBestOrder(order.Side, order.Price);
+            var bestOrder = orderBook.GetBestOrder(
+                order.Side == Side.Buy ? Side.Sell : Side.Buy,
+                order.Price);
 
             if (bestOrder == null)
             {

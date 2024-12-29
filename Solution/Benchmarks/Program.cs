@@ -12,7 +12,7 @@ using System.Diagnostics;
 var appleShares = Asset.Create("AAPL", "Apple Inc.");
 
 // Order Book
-var appleOrderBook = OrderBookRBTree.Create(appleShares);
+var appleOrderBook = OrderBookBST.Create(appleShares);
 
 // Order Queue
 var appleOrderQueue = OrderQueue.Create(appleOrderBook);

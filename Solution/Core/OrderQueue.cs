@@ -5,17 +5,17 @@ namespace Core;
 
 public class OrderQueue
 {
-    private readonly OrderBook _orderBook;
+    private readonly IOrderBook _orderBook;
     private readonly ConcurrentQueue<Order> _orders = new();
     private readonly object workerLock = new();
     private Task? workerTask = null;
 
-    private OrderQueue(OrderBook orderBook)
+    private OrderQueue(IOrderBook orderBook)
     {
         _orderBook = orderBook;
     }
 
-    public static OrderQueue Create(OrderBook orderBook) => new(orderBook);
+    public static OrderQueue Create(IOrderBook orderBook) => new(orderBook);
 
     public int Count => _orders.Count;
 
@@ -69,7 +69,7 @@ public class OrderQueue
         }
     }
 
-    private void ProcessOrdersOngoing(OrderBook orderBook, CancellationToken token)
+    private void ProcessOrdersOngoing(IOrderBook orderBook, CancellationToken token)
     {
         Console.WriteLine($"Thread {Environment.CurrentManagedThreadId} has started processing orders at {DateTime.UtcNow}.");
 
@@ -90,7 +90,7 @@ public class OrderQueue
         }
     }
 
-    private void ProcessOrdersQueue(OrderBook orderBook)
+    private void ProcessOrdersQueue(IOrderBook orderBook)
     {
         // Console.WriteLine($"Thread {Environment.CurrentManagedThreadId} has started processing orders at {DateTime.UtcNow}.");
 
