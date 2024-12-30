@@ -87,4 +87,9 @@ public class OrderBookBST : IOrderBook
 
         return null;
     }
+
+    // Expose snapshots for testing
+    // In reality we'd have methods for accessing the underlying data structures e.g. market depth but this is out of scope
+    public IReadOnlyDictionary<LimitPrice, Queue<LimitOrder>> GetBidsSnapshot() => _bids;
+    public IReadOnlyDictionary<LimitPrice, Queue<LimitOrder>> GetAsksSnapshot() => _asks;
 }

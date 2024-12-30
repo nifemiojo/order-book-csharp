@@ -54,6 +54,9 @@ public class OrderBook : IOrderBook
 
     public List<LimitOrder> GetCounterOrders(Side side, LimitPrice? limitPrice = null)
     {
+        // This method results in a large number of unecessary allocations
+        // Both .Where() and .ToList() allocate each time they are called
+        // This adds pressure to the GC causing more frequent GCs
         if (side == Side.Buy)
             return limitPrice == null ? _asks : _asks.Where(order => order.Price.Amount <= limitPrice.Amount).ToList();
         else if (side == Side.Sell)

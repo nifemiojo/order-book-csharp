@@ -23,6 +23,7 @@ public static class MatchingService
             var matchQuantity = Math.Min(bestOrder.Quantity, remainingQuantity);
 
             remainingQuantity -= matchQuantity;
+            order.Quantity -= matchQuantity;
             bestOrder.Quantity -= matchQuantity;
 
             // Console.WriteLine($"Matched {matchQuantity} units at {bestOrder.Price.Amount:C} with order #{bestOrder.Id}.");
@@ -70,6 +71,7 @@ public static class MatchingService
             var matchQuantity = Math.Min(bestOrder.Quantity, remainingQuantity);
 
             remainingQuantity -= matchQuantity;
+            order.Quantity -= matchQuantity;
             bestOrder.Quantity -= matchQuantity;
 
             // Console.WriteLine($"Matched {matchQuantity} units at {bestOrder.Price.Amount:C} with order #{bestOrder.Id}.");
